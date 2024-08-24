@@ -11,8 +11,7 @@
 9. En la terminal de vscode, ejecutar el comando `make qemu`
 10. Comprobar que compilo correctamente con los siguientes comandos:
 
-    ```
-    ls
+    ```ls
     echo "Hola xv6
     cat README
     ```
