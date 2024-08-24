@@ -10,9 +10,11 @@
 8. Abrir VScode en el directorio xv6-riscv.
 9. En la terminal de vscode, ejecutar el comando `make qemu`
 10. Comprobar que compilo correctamente con los siguientes comandos:
-    a. `ls`
-    b. `echo "Hola xv6`
-    c. `cat README`
+    <ol type="a">
+    <li>`ls`</li>
+    <li>`echo "Hola xv6`</li>
+    <li>`cat README`</li>
+    </ol>
 
     Donde se deberian observar:
     [screenshot1.png](screenshot1.png) y [screenshot2.png](screenshot1.png)
