@@ -1,4 +1,4 @@
-###<ins>Instalacion:<ins>
+###Instalacion:
 
 1. Instalar y ejecutar Ubuntu en Virtualbox.
 2. Instalar VScode: `sudo apt install ./<file>.deb`
@@ -20,7 +20,7 @@
     -Donde se deberian observar:
     [screenshot1.png](screenshot1.png) y [screenshot2.png](screenshot1.png)
 
-###<ins>Problemas:<ins>
+###Problemas:
 
 Uno de los problemas que encontre, fue que no me quedaba claro como instalar el gnu-toolchain, dado que en el repositorio oficial, aparecen una serie de procesos que no me quedaba claro como aplicarlos, y dada mi falta de experiencia con el sistema linux, no se me ocurrio instalarlo con "apt install".
 Originalmente, tenia planeado utilizar el sistema wsl de windows, pero a la hora de instalar el emulador qemu, me daba una serie de errores.
