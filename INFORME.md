@@ -13,7 +13,9 @@
     `ls`
     `echo "Hola xv6`
     `cat README`
-    Dode se deberian observar [screenshot1.png] y [screenshot2.png]
+
+    Donde se deberian observar:
+    [screenshot1.png](screenshot1.png) y [screenshot2.png](screenshot1.png)
 
 <ins>Problemas:<ins>
 
