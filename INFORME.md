@@ -1,12 +1,18 @@
 <ins>Instalacion:<ins>
 
-1.Instalar y ejecutar Ubuntu en Virtualbox
-2.Instalar vscode "sudo apt install ./<file>.deb"
-3.Instalar git "sudo apt install git-all"
-4.Instalar gcc "sudo apt install build-essential"
-5.Instalar qemu "sudo apt-get install qemu-system"
-6.Instalar gnu-toolchain-riscv "sudo apt install gcc-riscv64-unknown-elf"
-7.clonar xv6-riscv "git clone https://github.com/mit-pdos/xv6-riscv.git"
+1.Instalar y ejecutar Ubuntu en Virtualbox.
+2.Instalar VScode: `sudo apt install ./<file>.deb`
+3.Instalar git: `sudo apt install git-all`
+4.Instalar gcc: `sudo apt install build-essential`
+5.Instalar qemu: `sudo apt-get install qemu-system`
+6.Instalar `gnu-toolchain-riscv "sudo apt install gcc-riscv64-unknown-elf`
+7.Clonar xv6-riscv: `git clone https://github.com/mit-pdos/xv6-riscv.git`
+8.Abrir VScode en el directorio xv6-riscv.
+9.En la terminal de vscode, ejecutar el comando `make qemu`
+10.Comprobar que compilo correctamente con los siguientes comandos:
+`ls`
+`echo "Hola xv6`
+`cat README`
 
 <ins>Problemas:<ins>
 
