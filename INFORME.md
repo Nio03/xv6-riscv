@@ -23,4 +23,4 @@
 ### Problemas:
 
 Uno de los problemas que encontre, fue que no me quedaba claro como instalar el gnu-toolchain, dado que en el repositorio oficial, aparecen una serie de procesos que no me quedaba claro como aplicarlos, y dada mi falta de experiencia con el sistema linux, no se me ocurrio instalarlo con "apt install".
-Originalmente, tenia planeado utilizar el sistema wsl de windows, pero a la hora de instalar el emulador qemu, me daba una serie de errores.
+Originalmente, tenia planeado utilizar el sistema wsl de windows, pero a la hora de instalar el emulador qemu, me generaban una serie de errores.
