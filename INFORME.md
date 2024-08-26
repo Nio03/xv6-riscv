@@ -5,7 +5,7 @@
 3. Instalar git: `sudo apt install git-all`
 4. Instalar gcc: `sudo apt install build-essential`
 5. Instalar qemu: `sudo apt-get install qemu-system`
-6. Instalar `gnu-toolchain-riscv "sudo apt install gcc-riscv64-unknown-elf`
+6. Instalar gnu-toolchain-riscv: `sudo apt install gcc-riscv64-unknown-elf`
 7. Clonar xv6-riscv: `git clone https://github.com/mit-pdos/xv6-riscv.git`
 8. Abrir VScode en el directorio xv6-riscv.
 9. En la terminal de vscode, ejecutar el comando `make qemu`
