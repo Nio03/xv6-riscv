@@ -1,13 +1,11 @@
-#include "types.h"
-#include "riscv.h"
-#include "defs.h"
-#include "param.h"
-#include "memlayout.h"
-#include "spinlock.h"
-#include "proc.h"
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
 
-uint64
-sys_getppid(void)
+int main(void)
 {
-    return myproc()->parent->pid;
+
+    int ppid = getppid();
+    printf("Parent PID: %d\n", ppid);
+    exit(0);
 }
