@@ -26,7 +26,11 @@
 
 ### Ejecucion:
 
-1. Inicializar el sistema operativo xv6-riscv
+1. Inicializar el sistema operativo xv6-riscv desde cero
+    ```
+        make clean
+        make qemu
+    ```
 2. Ejecutar el comando: `test`
   
 
