@@ -7,7 +7,7 @@
 4. En el usys.pl linea 39 se agrego: `int "getppid(void")`
 5. En el Makefile en la linea 32 se agrego: `$K/sysgetppid.o`
    Y en la linea 143 se agrego: `$U/_test\`
-6.En la carpeta user se creo un archivo llamado test.c con el codigo
+6. En la carpeta user se creo un archivo llamado test.c con el codigo
     ```
         #include "kernel/types.h"
         #include "kernel/stat.h"
