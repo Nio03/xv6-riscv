@@ -1,4 +1,20 @@
-### Instalacion:
+### Cambios realizados:
+
+1. En el archivo syscall.h se agrego la definicion `#define SYS_getppid 22` .
+2. En el archivo syscall.c linea 100 se agrego : `extern uint64 sys_getppid(void);`
+    Y en la linea 126 se agrego: `[SYS_getppid] sys_getppid,`
+3. En el archivo user.h en la linea 45 se agrego: `int getppid(void);`
+4. En el usys.pl linea 39 se agrego: `int "getppid(void")`
+5. En el Makefile en la linea 32 se agrego: `$K/sysgetppid.o`
+   Y en la linea 143 se agrego: `$U/_test\`
+6.En la carpeta user se creo un archivo llamado test.c con el codigo
+    ```
+    
+    ```
+   
+
+
+### Ejecucion:
 
 1. Instalar y ejecutar Ubuntu en Virtualbox.
 2. Instalar VScode: `sudo apt install ./<file>.deb`
