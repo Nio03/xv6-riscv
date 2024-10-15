@@ -1,26 +1,67 @@
-### Instalacion:
+## Cambios Realizados
 
-1. Instalar y ejecutar Ubuntu en Virtualbox.
-2. Instalar VScode: `sudo apt install ./<file>.deb`
-3. Instalar git: `sudo apt install git-all`
-4. Instalar gcc: `sudo apt install build-essential`
-5. Instalar qemu: `sudo apt-get install qemu-system`
-6. Instalar gnu-toolchain-riscv: `sudo apt install gcc-riscv64-unknown-elf`
-7. Clonar xv6-riscv: `git clone https://github.com/mit-pdos/xv6-riscv.git`
-8. Abrir VScode en el directorio xv6-riscv.
-9. En la terminal de vscode, ejecutar el comando `make qemu`
-10. Comprobar que compilo correctamente con los siguientes comandos:
+1. **Estructura del Proceso** (`proc.h`):
+   - Se añadio a la estructura de procesos (`struct proc`):
+     ```c
+     int priority;
+     int boost;
+     ```
 
-    ```
-    ls
-    echo "Hola xv6
-    cat README
-    ```
+2. En la función `allocproc()`, que se utiliza para inicializar nuevos procesos, se agregaron las siguientes líneas para inicializar los campos:
+     ```c
+     p->priority = 0;
+     p->boost = 1;
+     ```
 
-    -Donde se deberian observar:
-    [screenshot1.png](screenshot1.png) y [screenshot2.png](screenshot1.png)
+3. - Se añadió "lógica" en el scheduler para aumentar la prioridad de los procesos ejecutables (`RUNNABLE`) en función de su boost:
+     ```c
+     for(p = proc; p < &proc[NPROC]; p++) {
+       if(p->state == RUNNABLE) {
+         p->priority += p->boost;  // Incrementar la prioridad
 
-### Problemas:
+         // Ajustar el boost si la prioridad alcanza límites
+         if(p->priority >= 9) {
+           p->boost = -1;  // Disminuir boost si la prioridad llega a 9
+         } else if(p->priority <= 0) {
+           p->boost = 1;   // Aumentar boost si la prioridad llega a 0
+         }
+       }
+     }
+     ```
 
-Uno de los problemas que encontre, fue que no me quedaba claro como instalar el gnu-toolchain, dado que en el repositorio oficial, aparecen una serie de procesos que no me quedaba claro como aplicarlos, y dada mi falta de experiencia con el sistema linux, no se me ocurrio instalarlo con "apt install".
-Originalmente, tenia planeado utilizar el sistema wsl de windows, pero a la hora de instalar el emulador qemu, me generaban una serie de errores.
+## Problemas Encontrados
+
+1. **Error de variable no inicializada**:
+   - Al intentar asignar los valores de `priority` y `boost` en la función `allocproc()`, se generaba un error de compilación:
+     ```
+     kernel/proc.c:117:15: error: 'p' is used uninitialized [-Werror=uninitialized]
+     ```
+   - **Solución**: El error ocurrió porque `p` no estaba correctamente inicializado. Para corregirlo, se movio a la linea 131 donde p se volvia 'used'
+     ```c
+      p->pid = allocpid();
+      p->state = USED;
+
+      p->priority = 0; // Inicializar prioridad en 0
+      p->boost = 1;
+     }
+     ```
+
+## Archivo de Prueba: `test_priority.c`
+
+-Para ejecutarlo se añadio un ```$U/_test_priority\``` en el makefile linea 142
+
+El archivo `test_priority.c` es un programa de prueba que genera 20 procesos mediante llamadas a `fork()`. Cada proceso imprime un mensaje en pantalla que indica que está siendo ejecutado y luego duerme por un tiempo determinado usando `sleep()`.
+
+   - Utiliza `fork()` para crear 20 procesos hijos.
+   - Cada proceso hijo imprime un mensaje en pantalla con su `PID`.
+   - Cada proceso duerme por unos segundos usando la función `sleep(10)` para simular una carga de trabajo.
+   - El proceso padre espera a que todos los procesos hijos terminen con `wait()` antes de finalizar.
+ 
+
+##Ejecucion
+```
+    make clean #empieze de 0
+    make qemu
+    test_priority
+```
+
