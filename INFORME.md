@@ -60,7 +60,7 @@ El archivo `test_priority.c` es un programa de prueba que genera 20 procesos med
 
 ##Ejecucion
 ```
-    make clean #empieze de 0
+    make clean
     make qemu
     test_priority
 ```
