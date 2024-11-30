@@ -1,26 +1,202 @@
-### Instalacion:
 
-1. Instalar y ejecutar Ubuntu en Virtualbox.
-2. Instalar VScode: `sudo apt install ./<file>.deb`
-3. Instalar git: `sudo apt install git-all`
-4. Instalar gcc: `sudo apt install build-essential`
-5. Instalar qemu: `sudo apt-get install qemu-system`
-6. Instalar gnu-toolchain-riscv: `sudo apt install gcc-riscv64-unknown-elf`
-7. Clonar xv6-riscv: `git clone https://github.com/mit-pdos/xv6-riscv.git`
-8. Abrir VScode en el directorio xv6-riscv.
-9. En la terminal de vscode, ejecutar el comando `make qemu`
-10. Comprobar que compilo correctamente con los siguientes comandos:
+# Informe de la Tarea 4: Manejo de Permisos en Archivos y Modificaciones al Kernel de xv6-riscv
 
+## Cambios Realizados
+
+### 1. Modificaciones en `fs.h`
+1. **Adición de Campo de Permisos**:
+   - Se agregó un nuevo campo `perm` a la estructura `dinode` para gestionar los permisos de los archivos. Esto permite restringir operaciones como lectura, escritura o modificabilidad.
+
+   ```c
+   struct dinode {
+       ...
+       int perm;    // Permisos del archivo (0=RW, 1=R, 2=W, 5=Immutable)
+       char pad[60]; // Alineación para mantener estructura múltiplo de 4 bytes
+       ...
+   };
+   ```
+
+2. **Propósito del Campo `perm`**:
+   - Define el nivel de acceso permitido para los archivos:
+     - `0`: Lectura y escritura habilitadas.
+     - `1`: Solo lectura.
+     - `2`: Solo escritura.
+     - `5`: Archivo inmutable (no lectura ni escritura).
+
+---
+
+### 2. Cambios en `sys_open`
+1. **Validación de Permisos**:
+   - Se añadió la lógica para verificar permisos al abrir un archivo.
+   - Se valida que los archivos inmutables (`perm=5`) o de solo lectura no puedan ser abiertos en modo de escritura.
+
+   ```c
+   uint perm = get_permissions(ip);
+   if ((perm == 1 && (omode & (O_WRONLY | O_RDWR))) || 
+       (perm == 5 && (omode & (O_WRONLY | O_RDWR)))) {
+       printf("sys_open: Permission denied for file=%s
+        ", path);
+       iunlockput(ip);
+       end_op();
+       return -1;
+   }
+   ```
+
+2. **Reimplementación de `create`**:
+   - Se corrigió la lógica para garantizar que los archivos sean creados correctamente si no existen, y que se valide su tipo (`T_FILE`).
+
+---
+
+### 3. Cambios en `sys_read`
+1. **Restricción de Lectura**:
+   - Se agregó la validación de permisos en el syscall `sys_read` para evitar leer archivos marcados como de solo escritura (`perm=2`) o inmutables (`perm=5`).
+
+   ```c
+   uint perm = get_permissions(ip);
+   if (perm == 2 || perm == 5) { // Bloquear lectura
+       iunlock(ip);
+       return -1;
+   }
+   ```
+
+2. **Propósito**:
+   - Garantizar que los permisos se respeten al intentar leer archivos.
+
+---
+
+### 4. Modificaciones Auxiliares en Permisos
+1. **Función `get_permissions`**:
+   - Implementada para leer el campo de permisos desde el disco.
+
+   ```c
+   static uint get_permissions(struct inode *ip) {
+       struct dinode din;
+       if (readi(ip, 0, (uint64)&din, ip->inum * sizeof(struct dinode), sizeof(struct dinode)) != sizeof(struct dinode)) {
+           printf("get_permissions: Failed to read dinode for inum=%d
+    ", ip->inum);
+           return 3; // Retornar permisos por defecto
+       }
+       return din.perm;
+   }
+   ```
+
+2. **Función `set_permissions`**:
+   - Permite modificar el campo de permisos en disco.
+
+   ```c
+   static void set_permissions(struct inode *ip, uint perm) {
+       struct dinode din;
+       if (readi(ip, 0, (uint64)&din, ip->inum * sizeof(struct dinode), sizeof(struct dinode)) != sizeof(struct dinode)) {
+           printf("set_permissions: Failed to read dinode for inum=%d
+    ", ip->inum);
+           return;
+       }
+       din.perm = perm;
+       writei(ip, 0, (uint64)&din, ip->inum * sizeof(struct dinode), sizeof(struct dinode));
+   }
+   ```
+
+---
+
+### 5. Modificaciones en el `Makefile`
+1. **Inclusión del Test**:
+   - Se añadió el archivo de prueba `chmod_test` al `Makefile` para generar el ejecutable.
+
+   ```make
+   UPROGS += _chmod_test   ```
+
+---
+
+### 6. Creación de `chmod_test.c`
+1. **Propósito**:
+   - Validar las funciones de creación, apertura, lectura y escritura de archivos con distintos permisos.
+
+2. **Estructura del Test**:
+   - Se implementaron las siguientes pruebas:
+     - Creación de un archivo y validación de permisos.
+     - Escritura y lectura del archivo.
+     - Intento de abrir archivos en modos no permitidos.
+
+   ```c
+   int fd = open("testfile", O_CREATE | O_RDWR);
+   if (fd >= 0) {
+       printf("Success: Created and opened file testfile with fd=%d
+    ", fd);
+   } else {
+       printf("Error: Failed to create file testfile
+    ");
+   }
+   ```
+
+3. **Ejecución del Test**:
+   - Para ejecutar el test:
+     ```bash
+     $ chmod_test
+     ```
+
+4. **Salida Esperada**:
+   ```
+   Starting File System Tests
+   Test: File Creation and Opening
+   Success: Created and opened file testfile with fd=3
+   Test: File Write and Read
+   Success: Wrote to file testfile
+   Success: Read from file testfile: 'Hello, xv6!'
+   Test: File Open with Wrong Mode
+   Success: Write failed as expected on read-only file testfile
+   Test: File Close
+   Success: Write failed as expected on closed file
+   All tests completed successfully.
+   ```
+
+---
+
+## Problemas Resueltos
+
+1. **`SEEK_SET` no definido en el test**:
+   - **Causa**: Falta de definición de constantes en xv6.
+   - **Solución**: Se definió manualmente en el archivo `chmod_test.c`.
+
+   ```c
+   #define SEEK_SET 0
+   ```
+
+2. **Errores de alineación en `struct dinode`**:
+   - **Causa**: Tamaño de estructura no múltiplo de 4 bytes.
+   - **Solución**: Se añadió un campo `padding` en `fs.h`.
+
+   ```c
+   char pad[60]; // Alineación
+   ```
+   El padding es 60 fue determinado con este comando:
     ```
-    ls
-    echo "Hola xv6
-    cat README
+        printf("Size of struct dinode: %d bytes\n", sizeof(struct dinode));
     ```
+    Que nos quedo en 128 Bytes.
 
-    -Donde se deberian observar:
-    [screenshot1.png](screenshot1.png) y [screenshot2.png](screenshot1.png)
+3. **Permisos no respetados**:
+   - **Causa**: Falta de validación en los syscalls.
+   - **Solución**: Validación añadida en `sys_open` y `sys_read`.
 
-### Problemas:
+---
 
-Uno de los problemas que encontre, fue que no me quedaba claro como instalar el gnu-toolchain, dado que en el repositorio oficial, aparecen una serie de procesos que no me quedaba claro como aplicarlos, y dada mi falta de experiencia con el sistema linux, no se me ocurrio instalarlo con "apt install".
-Originalmente, tenia planeado utilizar el sistema wsl de windows, pero a la hora de instalar el emulador qemu, me generaban una serie de errores.
+## Ejecución de xv6 y Validación
+
+### 1. Compilación del Sistema
+1. Limpieza y compilación del kernel:
+   ```bash
+   make clean
+   make qemu
+   ```
+
+### 2. Ejecución del Test
+1. Una vez dentro de xv6, ejecutar:
+   ```bash
+   $ chmod_test
+   ```
+
+### 3. Resultados Esperados
+- El test debe completar todas las pruebas con éxito:
+  ```
+  All tests completed successfully.
+  ```
